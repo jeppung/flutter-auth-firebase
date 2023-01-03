@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -9,13 +10,64 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final usernameController = TextEditingController();
+  final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  // Sign In Method
-  void signUserIn(String username, String password) {
-    debugPrint("$username - $password");
+  // Sign In Method (email & password)
+  void signUserIn(String email, String password) async {
+    // show loading circle
+    showDialog(
+      context: context,
+      builder: (loadingContext) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+
+    // try sign in
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        Navigator.pop(context);
+
+        AlertDialog alert = const AlertDialog(
+          title: Text("Login Error"),
+          content: Text("User not found"),
+        );
+
+        showDialog(
+          context: context,
+          builder: (alertContext) {
+            return alert;
+          },
+        );
+      } else if (e.code == "wrong-password") {
+        Navigator.pop(context);
+
+        AlertDialog alert = const AlertDialog(
+          title: Text("Login Error"),
+          content: Text("User not found"),
+        );
+
+        showDialog(
+          context: context,
+          builder: (alertContext) {
+            return alert;
+          },
+        );
+      }
+    }
+
+    // pop the loading screen
+    Navigator.pop(context);
   }
+
+  // Sign In Method (gmail)
 
   @override
   Widget build(BuildContext context) {
@@ -39,10 +91,10 @@ class _LoginPageState extends State<LoginPage> {
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 25),
               child: TextField(
-                controller: usernameController,
+                controller: emailController,
                 decoration: const InputDecoration(
                   filled: true,
-                  hintText: "Username",
+                  hintText: "Email",
                   border: OutlineInputBorder(),
                   fillColor: Colors.white30,
                 ),
@@ -80,7 +132,7 @@ class _LoginPageState extends State<LoginPage> {
               margin: const EdgeInsets.symmetric(horizontal: 25),
               child: ElevatedButton(
                 onPressed: () {
-                  signUserIn(usernameController.text, passwordController.text);
+                  signUserIn(emailController.text, passwordController.text);
                 },
                 child: const Text(
                   "Sign In",
