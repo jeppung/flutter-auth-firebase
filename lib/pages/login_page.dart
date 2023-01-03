@@ -32,6 +32,8 @@ class _LoginPageState extends State<LoginPage> {
         email: email,
         password: password,
       );
+
+      Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         Navigator.pop(context);
@@ -65,7 +67,6 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     // pop the loading screen
-    Navigator.pop(context);
   }
 
   // Sign In Method (gmail)
